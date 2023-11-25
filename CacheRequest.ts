@@ -85,7 +85,6 @@ const GetStorageContent = (Options : GetStorageOptions) => {
 	}
 
 	const currentDate = Options.currentDate;
-    // 5 minutes by default
     const storageExpires = Options.storageExpires ?? defaultStorageExpires;
     let StoredContent : StoredContent | null = null;
     let StoredValue : string | null = localStorage.getItem(Options.storageKey);
@@ -126,6 +125,7 @@ const PutStorageContent = async (Options : putStorageOptions) => {
 	const currentDate = Options.currentDate;
 	const Response = Options.response;
     const storageExpires = Options.storageExpires ?? defaultStorageExpires;
+    const storageKey = Options.storageKey;
 
 	let CreatedDate : Date;
 	let ExpireDate : Date;
@@ -158,7 +158,18 @@ const PutStorageContent = async (Options : putStorageOptions) => {
 	if (Response.ok) {
 		StoredContent.content = await Response.text();
 
-		localStorage.setItem(Options.storageKey, JSON.stringify(StoredContent));
+		localStorage.setItem(storageKey, JSON.stringify(StoredContent));
+
+		if (Options.storageList !== undefined) {
+			const storageList = Options.storageList;
+			const StoredValue = localStorage.getItem(storageList) ?? "[]";
+			const List : string[] = JSON.parse(StoredValue);
+
+			if (List.indexOf(storageKey) === -1) {
+				List.push(storageKey);
+				localStorage.setItem(storageList, JSON.stringify(List));
+			}
+		}
 	}
 
 	return StoredContent;

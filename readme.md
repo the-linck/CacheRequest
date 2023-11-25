@@ -53,10 +53,15 @@ Returns the Response Body parsed as pure text (string) for successful requests.
 
 
 
-## TODO:
+## Storage List
 
-### Common feats
-* Allow to save storage keys in a list on localStorage (to make cache control easier)
+When the `storageList` option is provided in `init` argument, after a succesful request we will use it as key to save in localStorage an string array of succesful requests that sahere the same `storageList`.
+
+With this freature, you can get a list of keys to seek in localStorage to better control the cache - like cleaning the cache of all requests made with our wrappers.
+
+
+
+## TODO:
 
 ### Harder feats
 * ArrayBuffer results
