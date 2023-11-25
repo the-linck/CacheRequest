@@ -157,6 +157,8 @@ const PutStorageContent = async (Options : putStorageOptions) => {
 	// Not storing failed responses
 	if (Response.ok) {
 		StoredContent.content = await Response.text();
+
+		localStorage.setItem(Options.storageKey, JSON.stringify(StoredContent));
 	}
 
 	return StoredContent;
@@ -164,30 +166,30 @@ const PutStorageContent = async (Options : putStorageOptions) => {
 
 
 
-export const JsonRequest = async <T>(Route : string, Options? : RequestOptions) => {
-	Options = Options ?? {};
+export const JsonRequest = async <T>(input : RequestInfo | URL, init? : RequestOptions) => {
+	init = init ?? {};
 
     const currentDate = new Date();
-    const storageExpires = Options.storageExpires ?? defaultStorageExpires;
+    const storageExpires = init.storageExpires ?? defaultStorageExpires;
 
 	let StoredContent : StoredContent | null = GetStorageContent({
 		currentDate,
 		storageExpires,
-		storageKey: Options.storageKey
+		storageKey: init.storageKey
 	});
     if (StoredContent !== null && StoredContent.content !== null) {
 		return JSON.parse(StoredContent.content) as T;
 	}
 
-	const FetchOptions = FilterOptions(Options);
-	const Response = await fetch(Route, FetchOptions);
+	const FetchOptions = FilterOptions(init);
+	const Response = await fetch(input, FetchOptions);
 	StoredContent = await PutStorageContent({
 		currentDate: currentDate,
 		response: Response,
 
 		storageExpires,
-		storageKey: Options.storageKey,
-		storageList: Options.storageList
+		storageKey: init.storageKey,
+		storageList: init.storageList
 	});
 
 	if (StoredContent !== null && StoredContent.content !== null) {
@@ -197,30 +199,30 @@ export const JsonRequest = async <T>(Route : string, Options? : RequestOptions) 
 	return null;
 };
 
-export const TextRequest = async (Route : string, Options? : RequestOptions) => {
-	Options = Options ?? {};
+export const TextRequest = async (input : RequestInfo | URL, init? : RequestOptions) => {
+	init = init ?? {};
 
     const currentDate = new Date();
-    const storageExpires = Options.storageExpires ?? defaultStorageExpires;
+    const storageExpires = init.storageExpires ?? defaultStorageExpires;
 
 	let StoredContent : StoredContent | null = GetStorageContent({
 		currentDate,
 		storageExpires,
-		storageKey: Options.storageKey
+		storageKey: init.storageKey
 	});
     if (StoredContent !== null) {
 		return StoredContent.content;
 	}
 
-	const FetchOptions = FilterOptions(Options);
-	const Response = await fetch(Route, FetchOptions);
+	const FetchOptions = FilterOptions(init);
+	const Response = await fetch(input, FetchOptions);
 	StoredContent = await PutStorageContent({
 		currentDate: currentDate,
 		response: Response,
 
 		storageExpires,
-		storageKey: Options.storageKey,
-		storageList: Options.storageList
+		storageKey: init.storageKey,
+		storageList: init.storageList
 	});
 
 	return StoredContent?.content ?? null;
